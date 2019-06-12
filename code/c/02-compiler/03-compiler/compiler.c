@@ -49,7 +49,52 @@ int F() {
     char *item = next();
     emit("t%d = %s\n", f, item);
   }
-  return f;
+  return f;#include <assert.h>
+#include "compiler.h"
+
+int E();
+void STMT();
+void IF();
+void BLOCK();
+
+int tempIdx = 0, labelIdx = 0;
+
+#define nextTemp() (tempIdx++)
+#define nextLabel() (labelIdx++)
+#define emit printf
+
+int isNext(char *set) {
+  char eset[SMAX], etoken[SMAX];
+  sprintf(eset, " %s ", set);
+  sprintf(etoken, " %s ", tokens[tokenIdx]);
+  return (tokenIdx < tokenTop && strstr(eset, etoken) != NULL);
+}
+
+int isEnd() {
+  return tokenIdx >= tokenTop;
+}
+
+char *next() {
+  // printf("token[%d]=%s\n", tokenIdx, tokens[tokenIdx]);
+  return tokens[tokenIdx++];
+}
+
+char *skip(char *set) {
+  if (isNext(set)) {
+    return next();
+  } else {
+    printf("skip(%s) got %s fail!\n", set, next());
+    assert(0);
+  }
+}
+
+// F = (E) | Number | Id
+int F() {
+  int f;
+  if (isNext("(")) { // '(' E ')'
+    next(); // (
+    f = E();
+    next(); // )
 }
 
 // E = F (op E)*
