@@ -55,7 +55,7 @@ int F() {
 // E = F (op E)*
 int E() {
   int i1 = F();
-  while (isNext("+ - * / & | ! < > =")) {
+  while (isNext("+ - * / & | ! < > =  == >= <=")) {
     char *op = next();
     int i2 = E();
     int i = nextTemp();
@@ -89,11 +89,31 @@ void WHILE() {
   emit("(L%d)\n", whileEnd);
 }
 
+//IF = if (E) STMT (else STMT)?
+void IF(){
+  int elseLabel = nextLabel();
+  int endifLabel = nextLabel();
+  skip("if");
+  skip("(");
+  int e = E();
+  skip(")");
+  emit("ifnot t%d goto L%d\n", e, elseLabel);
+  STMT();
+  emit("if t%d goto L%d\n", e, endifLabel);
+  if(isNext("else")){
+    emit("L%d",elseLabel);
+    skip("(");
+    STMT();
+    skip(")");
+  }
+  emit("L%d", endifLabel);
+}
+
 void STMT() {
   if (isNext("while"))
     return WHILE();
-  // else if (isNext("if"))
-  //   IF();
+  else if (isNext("if"))
+    IF();
   else if (isNext("{"))
     BLOCK();
   else
